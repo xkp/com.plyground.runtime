@@ -5,6 +5,7 @@
     "description": "A collection of runtime systems for the plyground platform",
     "unity": "2020.3",
 	"dependencies": {
+		"com.unity.ugui": "1.0.0"
 	}
   }
   
