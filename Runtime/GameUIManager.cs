@@ -76,8 +76,6 @@ public class GameUIManager : MonoBehaviour
 
 	[Header("Pause")]
 	[SerializeField] private bool allowPause = true;
-	[SerializeField] private bool listenForPauseKey = true;
-	[SerializeField] private KeyCode pauseKey = KeyCode.Escape;
 	[SerializeField] private bool startPaused;
 
 	[Header("End Game")]
@@ -140,12 +138,6 @@ public class GameUIManager : MonoBehaviour
 	{
 		if (!_mutationEventsRegistered)
 			RegisterMutationEvents();
-
-		if (!allowPause || !listenForPauseKey || _hasGameEnded)
-			return;
-
-		if (Input.GetKeyDown(pauseKey))
-			TogglePause();
 	}
 
 	private void OnDisable()
@@ -214,6 +206,11 @@ public class GameUIManager : MonoBehaviour
 		SetPaused(!_isPaused);
 	}
 
+	public void RequestTogglePause()
+	{
+		TogglePause();
+	}
+
 	public void SetPaused(bool paused)
 	{
 		if (!allowPause && paused)
@@ -237,6 +234,16 @@ public class GameUIManager : MonoBehaviour
 	public void ResumeGame()
 	{
 		SetPaused(false);
+	}
+
+	public void RequestPause()
+	{
+		SetPaused(true);
+	}
+
+	public void RequestResume()
+	{
+		ResumeGame();
 	}
 
 	public void EndGame(bool playerWon)
@@ -991,5 +998,33 @@ public class UIImageSlot : MonoBehaviour
 	public void ResetToDefault()
 	{
 		ApplySprite(defaultSprite);
+	}
+}
+
+public class GameUIPauseInputListener : MonoBehaviour
+{
+	[SerializeField] private GameUIManager targetManager;
+	[SerializeField] private bool listenForPauseKey = true;
+	[SerializeField] private KeyCode pauseKey = KeyCode.Escape;
+
+	private void Reset()
+	{
+		if (targetManager == null)
+			targetManager = GetComponent<GameUIManager>();
+	}
+
+	private void Awake()
+	{
+		if (targetManager == null)
+			targetManager = GetComponent<GameUIManager>();
+	}
+
+	private void Update()
+	{
+		if (targetManager == null || !listenForPauseKey)
+			return;
+
+		if (Input.GetKeyDown(pauseKey))
+			targetManager.RequestTogglePause();
 	}
 }

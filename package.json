@@ -1,6 +1,6 @@
 {
     "name": "com.plyground.runtime",
-    "version": "0.1.5",
+    "version": "0.1.6",
     "displayName": "Plyground Runtime",
     "description": "A collection of runtime systems for the plyground platform",
     "unity": "2020.3",
