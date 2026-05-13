@@ -79,6 +79,8 @@ public class GameUIManager : MonoBehaviour
 	[SerializeField] private bool startPaused;
 
 	[Header("End Game")]
+	[SerializeField] private bool endGameWhenObjectivesComplete = true;
+	[SerializeField] private bool endGameWhenObjectivesFail = true;
 	[SerializeField] private bool pauseTimeOnGameEnd = true;
 
 	[Header("Score")]
@@ -626,13 +628,17 @@ public class GameUIManager : MonoBehaviour
 
 	private void HandleObjectivesCompleted()
 	{
-		EndGame(true);
+		if (endGameWhenObjectivesComplete)
+			EndGame(true);
+
 		BroadcastWidgetRefresh();
 	}
 
 	private void HandleObjectivesFailed()
 	{
-		EndGame(false);
+		if (endGameWhenObjectivesFail)
+			EndGame(false);
+
 		BroadcastWidgetRefresh();
 	}
 

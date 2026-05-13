@@ -282,11 +282,14 @@ public class GameObjectiveManager : MonoBehaviour
 	{
 		bool allRequiredCompleted = true;
 		bool anyRequiredFailed = false;
+		bool hasRequiredObjectives = false;
 
 		foreach (GameObjective objective in objectives)
 		{
 			if (!objective.required)
 				continue;
+
+			hasRequiredObjectives = true;
 
 			if (objective.status == GameObjectiveStatus.Failed)
 				anyRequiredFailed = true;
@@ -301,7 +304,7 @@ public class GameObjectiveManager : MonoBehaviour
 			onAnyRequiredObjectiveFailed.Invoke();
 		}
 
-		if (allRequiredCompleted && !_completionEmitted)
+		if (hasRequiredObjectives && allRequiredCompleted && !_completionEmitted)
 		{
 			_completionEmitted = true;
 			onAllRequiredObjectivesCompleted.Invoke();
