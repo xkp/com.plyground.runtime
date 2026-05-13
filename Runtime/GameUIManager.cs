@@ -105,6 +105,7 @@ public class GameUIManager : MonoBehaviour
 	private readonly Dictionary<string, GameUIWidget> _widgetComponentsById = new Dictionary<string, GameUIWidget>(StringComparer.Ordinal);
 	private readonly Dictionary<string, float> _globalMutationValuesByKey = new Dictionary<string, float>(StringComparer.Ordinal);
 	private readonly Dictionary<int, Dictionary<string, float>> _targetMutationValuesByKey = new Dictionary<int, Dictionary<string, float>>();
+	private readonly List<GameUIWidget> _objectiveAwareWidgets = new List<GameUIWidget>();
 
 	private bool _didPlayerWin;
 	private bool _hasGameEnded;
@@ -158,6 +159,7 @@ public class GameUIManager : MonoBehaviour
 		_manualWidgetVisibility.Clear();
 		_appliedWidgetVisibility.Clear();
 		_widgetComponentsById.Clear();
+		_objectiveAwareWidgets.Clear();
 		_globalMutationValuesByKey.Clear();
 		_targetMutationValuesByKey.Clear();
 
@@ -195,6 +197,9 @@ public class GameUIManager : MonoBehaviour
 
 			_widgetComponentsById[widgetComponent.WidgetId] = widgetComponent;
 			widgetComponent.Bind(this);
+
+			if (widgetComponent is IGameUIObjectiveAwareWidget)
+				_objectiveAwareWidgets.Add(widgetComponent);
 		}
 
 		RefreshWidgetVisibility();
@@ -566,7 +571,11 @@ public class GameUIManager : MonoBehaviour
 
 	private void HandleObjectiveUpdated(GameObjective objective)
 	{
-		BroadcastWidgetRefresh();
+		for (int i = 0; i < _objectiveAwareWidgets.Count; i++)
+		{
+			if (_objectiveAwareWidgets[i] is IGameUIObjectiveAwareWidget objectiveAwareWidget)
+				objectiveAwareWidget.HandleObjectiveUpdated(objective);
+		}
 	}
 
 	private void RegisterMutationEvents()
@@ -662,6 +671,11 @@ public abstract class GameUIWidget : MonoBehaviour
 	protected virtual void OnBound() { }
 }
 
+public interface IGameUIObjectiveAwareWidget
+{
+	void HandleObjectiveUpdated(GameObjective objective);
+}
+
 public class GameUITextWidget : GameUIWidget
 {
 	[SerializeField] private Text targetText;
@@ -724,7 +738,7 @@ public class UIScoreTextWidget : GameUITextWidget
 	}
 }
 
-public class UIObjectiveSummaryWidget : GameUITextWidget
+public class UIObjectiveSummaryWidget : GameUITextWidget, IGameUIObjectiveAwareWidget
 {
 	[SerializeField] private GameObjectiveManager objectiveManager;
 	[SerializeField] private string format = "{0}/{1} Objectives";
@@ -769,6 +783,11 @@ public class UIObjectiveSummaryWidget : GameUITextWidget
 		}
 
 		SetText(string.Format(format, completedCount, requiredCount));
+	}
+
+	public void HandleObjectiveUpdated(GameObjective objective)
+	{
+		RefreshWidget();
 	}
 }
 
